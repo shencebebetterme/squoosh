@@ -35,4 +35,6 @@ To develop for Squoosh:
 
 Squoosh is an open-source project that appreciates all community involvement. To contribute to the project, follow the [contribute guide](/CONTRIBUTING.md).
 
+Test edit: pushed from the local Codex workspace on 2026-04-27.
+
 [squoosh]: https://squoosh.app
