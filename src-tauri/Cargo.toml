@@ -1,7 +1,7 @@
 [package]
 name = "squoosh_tauri"
 version = "2.0.0"
-description = "Standalone desktop build of the Squoosh image compression app."
+description = "Standalone desktop build of 量子图片处理."
 authors = ["Ce"]
 license = ""
 repository = ""

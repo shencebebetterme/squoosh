@@ -1,6 +1,6 @@
 {
   "$schema": "../node_modules/@tauri-apps/cli/config.schema.json",
-  "productName": "Squoosh",
+  "productName": "量子图片处理",
   "version": "2.0.0",
   "identifier": "com.ce.squoosh",
   "build": {
@@ -13,7 +13,7 @@
     "windows": [
       {
         "label": "main",
-        "title": "Squoosh",
+        "title": "量子图片处理",
         "width": 1440,
         "height": 960,
         "minWidth": 1100,
@@ -36,6 +36,14 @@
       "icons/128x128@2x.png",
       "icons/icon.icns",
       "icons/icon.ico"
-    ]
+    ],
+    "windows": {
+      "nsis": {
+        "installerIcon": "icons/icon.ico"
+      },
+      "wix": {
+        "language": "zh-CN"
+      }
+    }
   }
 }

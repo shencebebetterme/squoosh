@@ -375,7 +375,7 @@ export default class Output extends Component<Props, State> {
           ) : (
             <div class={style.emptyState}>
               <div class={style.emptyCard}>
-                <div class={style.emptyEyebrow}>Squoosh 桌面版</div>
+                <div class={style.emptyEyebrow}>量子图片处理桌面版</div>
                 <h1 class={style.emptyTitle}>打开图片开始压缩。</h1>
                 <p class={style.emptyText}>
                   将图片拖到工作区，选择本地文件，或按需查看示例图片。

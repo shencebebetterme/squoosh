@@ -321,7 +321,7 @@ export default class BatchCompress extends Component<Props, State> {
       processing: false,
       currentFile: undefined,
       zipUrl,
-      zipName: `squoosh-batch-${Date.now()}.zip`,
+      zipName: `量子图片处理-批量-${Date.now()}.zip`,
     });
   };
 
