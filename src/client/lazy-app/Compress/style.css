@@ -3,19 +3,16 @@
   height: 100%;
   contain: strict;
   display: grid;
-  grid-template-rows: max-content 1fr;
-  grid-template-areas:
-    'header'
-    'opts';
+  grid-template-rows: 1fr;
+  grid-template-areas: 'viewport';
+  background: #040608;
+  color: #fff;
 
   --options-radius: 7px;
 
   @media (min-width: 600px) {
-    grid-template-rows: max-content 1fr;
-    grid-template-columns: max-content 1fr max-content;
-    grid-template-areas:
-      'header header header'
-      'optsLeft viewportOpts optsRight';
+    grid-template-columns: 1fr 340px;
+    grid-template-areas: 'viewport optsRight';
   }
 }
 
@@ -33,6 +30,7 @@
   grid-template-rows: 1fr max-content;
   align-content: end;
   align-self: end;
+  z-index: 4;
 
   @media (min-width: 600px) {
     width: 300px;
@@ -41,8 +39,8 @@
 }
 
 .options-1-theme {
-  --main-theme-color: var(--pink);
-  --hot-theme-color: var(--hot-pink);
+  --main-theme-color: #20252c;
+  --hot-theme-color: #20252c;
   --header-text-color: var(--white);
   --scroller-radius: var(--options-radius) var(--options-radius) 0 0;
   --rotate-copyoverbutton-angle: 90deg; /* To point down */
@@ -54,14 +52,14 @@
 }
 
 .options-2-theme {
-  --main-theme-color: var(--blue);
-  --hot-theme-color: var(--deep-blue);
-  --header-text-color: var(--dark-text);
-  --scroller-radius: var(--options-radius) var(--options-radius) 0 0;
+  --main-theme-color: #68b2e6;
+  --hot-theme-color: #2392e0;
+  --header-text-color: #102130;
+  --scroller-radius: 0;
   --rotate-copyoverbutton-angle: -90deg; /* To point up */
 
   @media (min-width: 600px) {
-    --scroller-radius: var(--options-radius) 0 0 var(--options-radius);
+    --scroller-radius: 0;
     --rotate-copyoverbutton-angle: 180deg; /* To point left */
   }
 }
@@ -69,13 +67,22 @@
 .options-1 {
   composes: options;
   composes: options-1-theme;
-  grid-area: optsLeft;
+  display: none;
 }
 
 .options-2 {
   composes: options;
   composes: options-2-theme;
   grid-area: optsRight;
+  width: 100%;
+  max-width: none;
+  align-self: stretch;
+  background: #2b2d31;
+
+  @media (min-width: 600px) {
+    max-height: 100%;
+    overflow: hidden;
+  }
 }
 
 .multi-panel {
@@ -105,11 +112,11 @@
 
 .back {
   composes: unbutton from global;
-  position: relative;
-  grid-area: header;
-  margin: 9px;
+  position: absolute;
+  margin: 20px;
   justify-self: start;
   align-self: start;
+  z-index: 6;
 
   & > svg {
     width: 47px;
@@ -147,4 +154,23 @@
 
 .back-x {
   fill: var(--white);
+}
+
+.results-dock-left,
+.results-dock-right {
+  position: absolute;
+  bottom: 24px;
+  z-index: 5;
+
+  @media (max-width: 599px) {
+    display: none;
+  }
+}
+
+.results-dock-left {
+  left: 20px;
+}
+
+.results-dock-right {
+  right: 20px;
 }

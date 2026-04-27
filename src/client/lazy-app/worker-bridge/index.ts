@@ -16,7 +16,7 @@ class WorkerBridge {
   /** Comlinked worker API. */
   protected _workerApi?: ProcessorWorkerApi;
   /** ID from setTimeout */
-  protected _workerTimeout?: number;
+  protected _workerTimeout?: ReturnType<typeof setTimeout>;
 
   protected _terminateWorker() {
     if (!this._worker) return;
@@ -43,7 +43,9 @@ for (const methodName of methodNames) {
       .then(async () => {
         if (signal.aborted) throw new DOMException('AbortError', 'AbortError');
 
-        clearTimeout(this._workerTimeout);
+        if (this._workerTimeout !== undefined) {
+          clearTimeout(this._workerTimeout);
+        }
         if (!this._worker) this._startWorker();
 
         const onAbort = () => this._terminateWorker();

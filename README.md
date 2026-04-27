@@ -31,6 +31,20 @@ To develop for Squoosh:
    npm run dev
    ```
 
+# Desktop app
+
+This fork also includes a [Tauri](https://tauri.app) desktop shell that packages
+the existing static frontend into a standalone executable.
+
+1. Run the desktop app in development mode:
+   ```sh
+   npm run tauri:dev
+   ```
+1. Build a standalone desktop executable / installer:
+   ```sh
+   npm run tauri:build
+   ```
+
 # Contributing
 
 Squoosh is an open-source project that appreciates all community involvement. To contribute to the project, follow the [contribute guide](/CONTRIBUTING.md).

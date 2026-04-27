@@ -1,4 +1,5 @@
 import type SnackBarElement from 'shared/custom-els/snack-bar';
+import { isTauriRuntime } from 'shared/environment';
 
 import { get, set } from 'idb-keyval';
 
@@ -60,6 +61,7 @@ export function getSharedImage(): Promise<File> {
 
 /** Set up the service worker and monitor changes */
 export async function offliner(showSnack: SnackBarElement['showSnackbar']) {
+  if (isTauriRuntime) return;
   if (__PRODUCTION__) navigator.serviceWorker.register(swUrl);
 
   const hasController = !!navigator.serviceWorker.controller;
@@ -101,6 +103,7 @@ export async function offliner(showSnack: SnackBarElement['showSnackbar']) {
  * heard about this, cache the heavier assets like codecs.
  */
 export async function mainAppLoaded() {
+  if (isTauriRuntime) return;
   // If the user has already interacted, no need to tell the service worker anything.
   const userInteracted = await get<boolean | undefined>('user-interacted');
   if (userInteracted) return;

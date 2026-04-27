@@ -18,6 +18,10 @@ const SIZE = 5;
 export default class ResultCache {
   private readonly _entries: CacheEntry[] = [];
 
+  clear() {
+    this._entries.length = 0;
+  }
+
   add(entry: CacheEntry) {
     // Add the new entry to the start
     this._entries.unshift(entry);

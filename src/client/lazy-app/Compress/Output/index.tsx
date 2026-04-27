@@ -30,6 +30,9 @@ interface Props {
   leftImgContain: boolean;
   rightImgContain: boolean;
   onPreprocessorChange: (newState: PreprocessorState) => void;
+  onPickFile: () => void;
+  onPickFolder: () => void;
+  onLoadSample: () => Promise<void>;
 }
 
 interface State {
@@ -63,6 +66,7 @@ export default class Output extends Component<Props, State> {
   componentDidMount() {
     const leftDraw = this.leftDrawable();
     const rightDraw = this.rightDrawable();
+    if (!this.pinchZoomLeft) return;
 
     // Reset the pinch zoom, which may have an position set from the previous view, after pressing
     // the back button.
@@ -78,6 +82,9 @@ export default class Output extends Component<Props, State> {
     }
     if (this.canvasRight && rightDraw) {
       drawDataToCanvas(this.canvasRight, rightDraw);
+    }
+    if (leftDraw) {
+      requestAnimationFrame(() => this.fitImageToViewport(leftDraw));
     }
   }
 
@@ -96,16 +103,24 @@ export default class Output extends Component<Props, State> {
 
     const oldSourceData = prevProps.source && prevProps.source.preprocessed;
     const newSourceData = this.props.source && this.props.source.preprocessed;
-    const pinchZoom = this.pinchZoomLeft!;
+    const pinchZoom = this.pinchZoomLeft;
+
+    if (!pinchZoom) {
+      return;
+    }
 
     if (sourceFileChanged) {
       // New image? Reset the pinch-zoom.
-      pinchZoom.setTransform({
-        allowChangeEvent: true,
-        x: 0,
-        y: 0,
-        scale: 1,
-      });
+      if (leftDraw) {
+        requestAnimationFrame(() => this.fitImageToViewport(leftDraw));
+      } else {
+        pinchZoom.setTransform({
+          allowChangeEvent: true,
+          x: 0,
+          y: 0,
+          scale: 1,
+        });
+      }
     } else if (
       oldSourceData &&
       newSourceData &&
@@ -131,6 +146,31 @@ export default class Output extends Component<Props, State> {
     if (rightDraw && rightDraw !== prevRightDraw && this.canvasRight) {
       drawDataToCanvas(this.canvasRight, rightDraw);
     }
+  }
+
+  private fitImageToViewport(image: ImageData) {
+    if (!this.pinchZoomLeft) return;
+    const viewport = this.pinchZoomLeft.getBoundingClientRect();
+    if (!viewport.width || !viewport.height) return;
+    const padding = 48;
+    const availableWidth = Math.max(viewport.width - padding, 1);
+    const availableHeight = Math.max(viewport.height - padding, 1);
+    const fitScale = Math.min(
+      1,
+      availableWidth / image.width,
+      availableHeight / image.height,
+    );
+    const fittedWidth = image.width * fitScale;
+    const fittedHeight = image.height * fitScale;
+    const x = (viewport.width - fittedWidth) / 2;
+    const y = (viewport.height - fittedHeight) / 2;
+
+    this.pinchZoomLeft.setTransform({
+      allowChangeEvent: true,
+      x,
+      y,
+      scale: fitScale,
+    });
   }
 
   shouldComponentUpdate(nextProps: Props, nextState: State) {
@@ -270,68 +310,103 @@ export default class Output extends Component<Props, State> {
     const rightDraw = this.rightDrawable();
     // To keep position stable, the output is put in a square using the longest dimension.
     const originalImage = source && source.preprocessed;
+    const hasImage = Boolean(originalImage);
 
     return (
       <Fragment>
         <div
           class={`${style.output} ${altBackground ? style.altBackground : ''}`}
         >
-          <two-up
-            legacy-clip-compat
-            class={style.twoUp}
-            orientation={mobileView ? 'vertical' : 'horizontal'}
-            // Event redirecting. See onRetargetableEvent.
-            onTouchStartCapture={this.onRetargetableEvent}
-            onTouchEndCapture={this.onRetargetableEvent}
-            onTouchMoveCapture={this.onRetargetableEvent}
-            onPointerDownCapture={
-              // We avoid pointer events in our PinchZoom due to a Safari bug.
-              // That means we also need to avoid them here too, else we end up preventing the fallback mouse events.
-              isSafari ? undefined : this.onRetargetableEvent
-            }
-            onMouseDownCapture={this.onRetargetableEvent}
-            onWheelCapture={this.onRetargetableEvent}
-          >
-            <pinch-zoom
-              class={style.pinchZoom}
-              onChange={this.onPinchZoomLeftChange}
-              ref={linkRef(this, 'pinchZoomLeft')}
+          {hasImage ? (
+            <two-up
+              legacy-clip-compat
+              class={style.twoUp}
+              orientation={mobileView ? 'vertical' : 'horizontal'}
+              // Event redirecting. See onRetargetableEvent.
+              onTouchStartCapture={this.onRetargetableEvent}
+              onTouchEndCapture={this.onRetargetableEvent}
+              onTouchMoveCapture={this.onRetargetableEvent}
+              onPointerDownCapture={
+                // We avoid pointer events in our PinchZoom due to a Safari bug.
+                // That means we also need to avoid them here too, else we end up preventing the fallback mouse events.
+                isSafari ? undefined : this.onRetargetableEvent
+              }
+              onMouseDownCapture={this.onRetargetableEvent}
+              onWheelCapture={this.onRetargetableEvent}
             >
-              <canvas
-                class={`${style.pinchTarget} ${
-                  aliasing ? style.pixelated : ''
-                }`}
-                ref={linkRef(this, 'canvasLeft')}
-                width={leftDraw && leftDraw.width}
-                height={leftDraw && leftDraw.height}
-                style={{
-                  width: originalImage ? originalImage.width : '',
-                  height: originalImage ? originalImage.height : '',
-                  objectFit: leftImgContain ? 'contain' : '',
-                }}
-              />
-            </pinch-zoom>
-            <pinch-zoom
-              class={style.pinchZoom}
-              ref={linkRef(this, 'pinchZoomRight')}
-            >
-              <canvas
-                class={`${style.pinchTarget} ${
-                  aliasing ? style.pixelated : ''
-                }`}
-                ref={linkRef(this, 'canvasRight')}
-                width={rightDraw && rightDraw.width}
-                height={rightDraw && rightDraw.height}
-                style={{
-                  width: originalImage ? originalImage.width : '',
-                  height: originalImage ? originalImage.height : '',
-                  objectFit: rightImgContain ? 'contain' : '',
-                }}
-              />
-            </pinch-zoom>
-          </two-up>
+              <pinch-zoom
+                class={style.pinchZoom}
+                onChange={this.onPinchZoomLeftChange}
+                ref={linkRef(this, 'pinchZoomLeft')}
+              >
+                <canvas
+                  class={`${style.pinchTarget} ${
+                    aliasing ? style.pixelated : ''
+                  }`}
+                  ref={linkRef(this, 'canvasLeft')}
+                  width={leftDraw && leftDraw.width}
+                  height={leftDraw && leftDraw.height}
+                  style={{
+                    width: originalImage ? originalImage.width : '',
+                    height: originalImage ? originalImage.height : '',
+                    objectFit: leftImgContain ? 'contain' : '',
+                  }}
+                />
+              </pinch-zoom>
+              <pinch-zoom
+                class={style.pinchZoom}
+                ref={linkRef(this, 'pinchZoomRight')}
+              >
+                <canvas
+                  class={`${style.pinchTarget} ${
+                    aliasing ? style.pixelated : ''
+                  }`}
+                  ref={linkRef(this, 'canvasRight')}
+                  width={rightDraw && rightDraw.width}
+                  height={rightDraw && rightDraw.height}
+                  style={{
+                    width: originalImage ? originalImage.width : '',
+                    height: originalImage ? originalImage.height : '',
+                    objectFit: rightImgContain ? 'contain' : '',
+                  }}
+                />
+              </pinch-zoom>
+            </two-up>
+          ) : (
+            <div class={style.emptyState}>
+              <div class={style.emptyCard}>
+                <div class={style.emptyEyebrow}>Squoosh 桌面版</div>
+                <h1 class={style.emptyTitle}>打开图片开始压缩。</h1>
+                <p class={style.emptyText}>
+                  将图片拖到工作区，选择本地文件，或按需查看示例图片。
+                </p>
+                <div class={style.emptyActions}>
+                  <button
+                    class={style.primaryAction}
+                    onClick={this.props.onPickFile}
+                  >
+                    打开图片
+                  </button>
+                  <button
+                    class={style.secondaryAction}
+                    onClick={this.props.onPickFolder}
+                  >
+                    批量文件夹
+                  </button>
+                  <button
+                    class={style.secondaryAction}
+                    onClick={this.props.onLoadSample}
+                  >
+                    查看示例
+                  </button>
+                </div>
+              </div>
+            </div>
+          )}
         </div>
-        <div class={style.controls}>
+        <div
+          class={`${style.controls} ${!hasImage ? style.controlsHidden : ''}`}
+        >
           <div class={style.buttonGroup}>
             <button class={style.firstButton} onClick={this.zoomOut}>
               <RemoveIcon />
@@ -365,7 +440,7 @@ export default class Output extends Component<Props, State> {
             <button
               class={style.firstButton}
               onClick={this.onRotateClick}
-              title="Rotate"
+              title="旋转"
             >
               <RotateIcon />
             </button>
@@ -373,7 +448,7 @@ export default class Output extends Component<Props, State> {
               <button
                 class={style.button}
                 onClick={this.toggleAliasing}
-                title="Toggle smoothing"
+                title="切换平滑"
               >
                 {aliasing ? (
                   <ToggleAliasingActiveIcon />
@@ -385,7 +460,7 @@ export default class Output extends Component<Props, State> {
             <button
               class={style.lastButton}
               onClick={this.toggleBackground}
-              title="Toggle background"
+              title="切换背景"
             >
               {altBackground ? (
                 <ToggleBackgroundActiveIcon />

@@ -58,9 +58,12 @@ interface Side {
 }
 
 interface Props {
-  file: File;
+  file?: File;
   showSnack: SnackBarElement['showSnackbar'];
   onBack: () => void;
+  onPickFile: () => void;
+  onPickFolder: () => void;
+  onLoadSample: () => Promise<void>;
 }
 
 interface State {
@@ -325,13 +328,15 @@ export default class Compress extends Component<Props, State> {
   // And again one for each side
   private sideAbortControllers = [new AbortController(), new AbortController()];
   /** For debouncing calls to updateImage for each side. */
-  private updateImageTimeout?: number;
+  private updateImageTimeout?: ReturnType<typeof setTimeout>;
 
   constructor(props: Props) {
     super(props);
     this.widthQuery.addListener(this.onMobileWidthChange);
     this.sourceFile = props.file;
-    this.queueUpdateImage({ immediate: true });
+    if (props.file) {
+      this.queueUpdateImage({ immediate: true });
+    }
 
     import('../sw-bridge').then(({ mainAppLoaded }) => mainAppLoaded());
   }
@@ -384,7 +389,11 @@ export default class Compress extends Component<Props, State> {
   componentWillReceiveProps(nextProps: Props): void {
     if (nextProps.file !== this.props.file) {
       this.sourceFile = nextProps.file;
-      this.queueUpdateImage({ immediate: true });
+      if (nextProps.file) {
+        this.queueUpdateImage({ immediate: true });
+      } else {
+        this.clearLoadedState();
+      }
     }
   }
 
@@ -577,7 +586,9 @@ export default class Compress extends Component<Props, State> {
     // again, in which case the timeout is reset.
     const delay = 100;
 
-    clearTimeout(this.updateImageTimeout);
+    if (this.updateImageTimeout !== undefined) {
+      clearTimeout(this.updateImageTimeout);
+    }
     if (immediate) {
       this.updateImage();
     } else {
@@ -585,7 +596,44 @@ export default class Compress extends Component<Props, State> {
     }
   }
 
-  private sourceFile: File;
+  private sourceFile?: File;
+
+  private clearLoadedState() {
+    this.mainAbortController.abort();
+    this.mainAbortController = new AbortController();
+    for (let i = 0; i < this.sideAbortControllers.length; i += 1) {
+      this.sideAbortControllers[i].abort();
+      this.sideAbortControllers[i] = new AbortController();
+      this.activeSideJobs[i] = undefined;
+    }
+    this.activeMainJob = undefined;
+    this.encodeCache.clear();
+
+    this.setState((currentState) =>
+      stateForNewSourceData({
+        ...currentState,
+        source: undefined,
+        loading: false,
+        preprocessorState: defaultPreprocessorState,
+        encodedPreprocessorState: undefined,
+        sides: currentState.sides.map((side, index) => ({
+          ...side,
+          loading: false,
+          latestSettings: {
+            processorState: defaultProcessorState,
+            encoderState:
+              index === 1
+                ? {
+                    type: 'mozJPEG',
+                    options: encoderMap.mozJPEG.meta.defaultOptions,
+                  }
+                : undefined,
+          },
+          encodedSettings: undefined,
+        })) as [Side, Side],
+      }),
+    );
+  }
   /** The in-progress job for decoding and preprocessing */
   private activeMainJob?: MainJob;
   /** The in-progress job for each side (processing and encoding) */
@@ -599,6 +647,7 @@ export default class Compress extends Component<Props, State> {
    * decides which steps can be skipped, and which can be cached.
    */
   private async updateImage() {
+    if (!this.sourceFile) return;
     const currentState = this.state;
 
     // State of the last completed job, or ongoing job
@@ -919,7 +968,7 @@ export default class Compress extends Component<Props, State> {
   }
 
   render(
-    { onBack }: Props,
+    { onBack, onPickFile, onPickFolder, onLoadSample }: Props,
     { loading, sides, source, mobileView, preprocessorState }: State,
   ) {
     const [leftSide, rightSide] = sides;
@@ -980,6 +1029,9 @@ export default class Compress extends Component<Props, State> {
           rightImgContain={rightImgContain}
           preprocessorState={preprocessorState}
           onPreprocessorChange={this.onPreprocessorChange}
+          onPickFile={onPickFile}
+          onPickFolder={onPickFolder}
+          onLoadSample={onLoadSample}
         />
         <button class={style.back} onClick={onBack}>
           <svg viewBox="0 0 61 53.3">
@@ -998,19 +1050,20 @@ export default class Compress extends Component<Props, State> {
           <div class={style.options}>
             <multi-panel class={style.multiPanel} open-one-only>
               <div class={style.options1Theme}>{results[0]}</div>
-              <div class={style.options1Theme}>{options[0]}</div>
+              <div class={style.options1Theme}>{results[0]}</div>
               <div class={style.options2Theme}>{results[1]}</div>
               <div class={style.options2Theme}>{options[1]}</div>
             </multi-panel>
           </div>
         ) : (
           [
-            <div class={style.options1} key="options1">
-              {options[0]}
+            <div class={style.resultsDockLeft} key="results1">
               {results[0]}
             </div>,
             <div class={style.options2} key="options2">
               {options[1]}
+            </div>,
+            <div class={style.resultsDockRight} key="results2">
               {results[1]}
             </div>,
           ]

@@ -1,0 +1,276 @@
+.batch {
+  --main-theme-color: #68b2e6;
+  --medium-light-gray: rgba(255, 255, 255, 0.32);
+  --white: #fff;
+  --black: #050709;
+  --scroller-radius: 0;
+  --header-text-color: #102130;
+
+  position: absolute;
+  inset: 0;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 360px;
+  background: #050709;
+  color: #fff;
+
+  @media (max-width: 900px) {
+    grid-template-columns: 1fr;
+    grid-template-rows: minmax(0, 1fr) auto;
+  }
+}
+
+.main {
+  min-width: 0;
+  min-height: 0;
+  padding: 96px 32px 32px;
+  overflow: auto;
+}
+
+.hero {
+  max-width: 760px;
+}
+
+.eyebrow {
+  font-size: 0.9rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #68b2e6;
+}
+
+.title {
+  margin: 12px 0;
+  font-size: clamp(2.1rem, 3vw, 4rem);
+  line-height: 1.02;
+}
+
+.text {
+  margin: 0;
+  max-width: 44rem;
+  line-height: 1.6;
+  color: rgba(255, 255, 255, 0.7);
+}
+
+.summary {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 16px;
+  margin-top: 28px;
+
+  @media (max-width: 700px) {
+    grid-template-columns: 1fr;
+  }
+}
+
+.metricCard {
+  padding: 18px 20px;
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.metricLabel {
+  color: rgba(255, 255, 255, 0.58);
+  font-size: 0.92rem;
+}
+
+.metricValue {
+  margin-top: 8px;
+  font-size: 1.8rem;
+  font-weight: 700;
+}
+
+.progressBlock {
+  margin-top: 28px;
+  padding: 20px;
+  border-radius: 18px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.progressLabel {
+  display: flex;
+  justify-content: space-between;
+  gap: 12px;
+  font-size: 0.95rem;
+  color: rgba(255, 255, 255, 0.76);
+}
+
+.progressBar {
+  margin-top: 12px;
+  height: 10px;
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.08);
+  overflow: hidden;
+}
+
+.progressFill {
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #68b2e6, #2392e0);
+}
+
+.fileList {
+  margin-top: 24px;
+  display: grid;
+  gap: 10px;
+}
+
+.fileRow {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto auto;
+  gap: 14px;
+  align-items: center;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.03);
+}
+
+.filePath {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.fileMeta,
+.fileStatus {
+  color: rgba(255, 255, 255, 0.62);
+  font-size: 0.92rem;
+}
+
+.sidebar {
+  border-left: 1px solid rgba(255, 255, 255, 0.06);
+  background: #26292f;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
+}
+
+.panelSection {
+  padding: 20px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.panelSection range-input {
+  width: 100%;
+}
+
+.panelHeading {
+  margin: 0 0 14px;
+  font-size: 1.4rem;
+  color: #fff;
+}
+
+.select {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 12px 14px;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 12px;
+  background: #1d2025;
+  color: #fff;
+  font: inherit;
+}
+
+.hint {
+  margin-top: 10px;
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: rgba(255, 255, 255, 0.62);
+}
+
+.toggleRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 14px;
+  color: #fff;
+  font-weight: 700;
+
+  input {
+    width: 18px;
+    height: 18px;
+    accent-color: #68b2e6;
+  }
+}
+
+.resizeFields {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+
+  label {
+    display: grid;
+    grid-template-columns: 86px minmax(0, 1fr);
+    align-items: center;
+    gap: 12px;
+    color: rgba(255, 255, 255, 0.78);
+  }
+
+  input {
+    width: 100%;
+    box-sizing: border-box;
+    border: 1px solid rgba(255, 255, 255, 0.08);
+    border-radius: 8px;
+    background: #1d2025;
+    color: #fff;
+    font: inherit;
+    padding: 9px 10px;
+  }
+}
+
+.actions {
+  margin-top: auto;
+  padding: 20px;
+  display: grid;
+  gap: 12px;
+}
+
+.actionPrimary,
+.actionSecondary,
+.download {
+  composes: unbutton from global;
+  width: 100%;
+  min-height: 48px;
+  border-radius: 999px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1rem;
+  font-weight: 600;
+  text-decoration: none;
+}
+
+.saveStatus {
+  min-height: 1.3em;
+  font-size: 0.86rem;
+  line-height: 1.45;
+  color: rgba(255, 255, 255, 0.68);
+  overflow-wrap: anywhere;
+}
+
+.actionPrimary,
+.download {
+  background: #68b2e6;
+  color: #102130;
+}
+
+.actionSecondary {
+  background: rgba(255, 255, 255, 0.05);
+  color: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.back {
+  composes: unbutton from global;
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  z-index: 2;
+  width: 60px;
+  height: 60px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, #ff2f86, #c6005b);
+  color: #fff;
+  font-size: 2rem;
+  line-height: 1;
+}

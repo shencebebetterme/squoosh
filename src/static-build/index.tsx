@@ -75,9 +75,8 @@ const toOutput: Output = {
         purpose: 'maskable',
       },
     ],
-    description:
-      'Compress and compare images with different codecs, right in your browser.',
-    lang: 'en',
+    description: '本地压缩、调整尺寸并对比图片。',
+    lang: 'zh-CN',
     categories: ['photo', 'productivity', 'utilities'],
     screenshots,
     share_target: {

@@ -18,5 +18,8 @@
       ]
     }
   ],
-  "redirects": [{ "source": "/editor", "destination": "/" }]
+  "rewrites": [
+    { "source": "/editor", "destination": "/index.html" },
+    { "source": "/batch", "destination": "/index.html" }
+  ]
 }
